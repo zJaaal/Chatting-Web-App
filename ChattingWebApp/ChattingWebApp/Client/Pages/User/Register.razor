@@ -7,47 +7,51 @@
 <EditForm Model="@_user" OnValidSubmit="@Regist">
     <DataAnnotationsValidator />
     <div class="container">
-
-        <div class="row mt-2">
-            <InputText Type="text" @bind-Value="_user.Nickname" Placeholder="Nickname" />
+        <div class="row">
+            <p style="@cssStyle">@message</p>
         </div>
-        <div class="row mt-2">
+        <div class="row">
+            <InputText Type="text" @bind-Value="_user.Nickname" Placeholder="Nickname" @onfocusout="Validate" />
+        </div>
+        <div class="row mt-3">
             <InputText Type="password" @bind-Value="_user.Password" Placeholder="Password" />
         </div>
-        <div class="row mt-2">
+        <div class="row mt-3">
             <InputText Type="password" @bind-Value="_user.RepeatPassword" Placeholder="Repeat Password" />
         </div>
     </div>
-    <button type="button" class="btn btn-primary mt-2 mr-2" @onclick="Validate">Validate</button>
-    @if (isValid)
-    {
-        <button type="submit" class="btn btn-primary mt-2">Register</button>
-    }
-    <ValidationSummary />
+    <div>
+        <button type="submit" class="btn btn-success mt-2" disabled="@isValid">Register</button>
+        <ValidationSummary />
+    </div>
 </EditForm>
-<div>
-    <p>@message</p>
-</div>
+
 
 @code {
 
     private User _user => state.Value.User;
 
     private string message => state.Value.ErrorMessage;
-    private bool isValid => state.Value.IsValid;
+    private bool isValid => !state.Value.IsValid;
+    private string cssStyle => isValid ? "color: red;" : "color: green;";
 
     public async Task Validate()
     {
-        dispatcher.Dispatch(new UserErrorMessageSetAction(""));
+        if (_user.Nickname == " " || string.IsNullOrEmpty(_user.Nickname))
+            return;
+
+        dispatcher.Dispatch(new RegisterErrorMessageSetAction(""));
 
         _user.Nickname = _user.Nickname.Replace(" ", "_").Trim();
 
-        await Task.Run( () => dispatcher.Dispatch(new UserValidateAction(_user)));
+        await Task.Run( () => dispatcher.Dispatch(new RegisterValidateAction(_user)));
 
         StateHasChanged();
     }
     public void Regist()
     {
-        dispatcher.Dispatch(new UserRegisterAction(_user));
+        //Add a BlazoredToast (maybe) to let the user know that they registered on the system.
+        dispatcher.Dispatch(new RegisterRegisterAction(_user));
+        dispatcher.Dispatch(new RegisterOnResetAction());
     }
 }

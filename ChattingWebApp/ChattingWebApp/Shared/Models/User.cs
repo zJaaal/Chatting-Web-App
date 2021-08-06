@@ -12,7 +12,7 @@ namespace ChattingWebApp.Shared.Models
 
         [Required]
         [StringLength(maximumLength: 8000, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
-        [RegularExpression(@"^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)).+$")]
+        [RegularExpression(@"^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)).+$", ErrorMessage = "Password must have at least one uppercase, one lowcase letter and a number")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 

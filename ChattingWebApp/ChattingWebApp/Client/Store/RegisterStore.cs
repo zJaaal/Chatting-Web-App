@@ -31,40 +31,40 @@ namespace ChattingWebApp.Client.Store
             };
         }
     }
-    public class UserValidateAction 
+    public class RegisterValidateAction 
     {
         public User user { get; }
 
-        public UserValidateAction(User user)
+        public RegisterValidateAction(User user)
         {
             this.user = user;
         }
     }
-    public class UserOnValidatingAction { }
-    public class UserOnResetAction { }
-    public class UserIsValidSetAction 
+    public class RegisterOnValidatingAction { }
+    public class RegisterOnResetAction { }
+    public class RegisterIsValidSetAction 
     {
         public bool isValid { get; }
 
-        public UserIsValidSetAction(bool IsValid)
+        public RegisterIsValidSetAction(bool IsValid)
         {
             isValid = IsValid;
         }
     }
-    public class UserErrorMessageSetAction
+    public class RegisterErrorMessageSetAction
     {
         public string message;
 
-        public UserErrorMessageSetAction(string message)
+        public RegisterErrorMessageSetAction(string message)
         {
             this.message = message;
         }
     }
-    public class UserRegisterAction
+    public class RegisterRegisterAction
     {
         public User user { get; }
 
-        public UserRegisterAction(User user)
+        public RegisterRegisterAction(User user)
         {
             this.user = user;
         }
@@ -72,7 +72,7 @@ namespace ChattingWebApp.Client.Store
 
     public static class UserReducers
     {
-        [ReducerMethod(typeof(UserOnValidatingAction))]
+        [ReducerMethod(typeof(RegisterOnValidatingAction))]
         public static RegisterState OnValidating(RegisterState state)
         {
             return state with
@@ -80,7 +80,7 @@ namespace ChattingWebApp.Client.Store
                 Validating = true
             };
         }
-        [ReducerMethod(typeof(UserOnResetAction))]
+        [ReducerMethod(typeof(RegisterOnResetAction))]
         public static RegisterState OnReset(RegisterState state)
         {
             return state with
@@ -92,7 +92,7 @@ namespace ChattingWebApp.Client.Store
             };
         }
         [ReducerMethod]
-        public static RegisterState SetIsValid(RegisterState state, UserIsValidSetAction action)
+        public static RegisterState SetIsValid(RegisterState state, RegisterIsValidSetAction action)
         {
             return state with
             {
@@ -102,7 +102,7 @@ namespace ChattingWebApp.Client.Store
             };
         }
         [ReducerMethod]
-        public static RegisterState SetErrorMessage(RegisterState state,UserErrorMessageSetAction action)
+        public static RegisterState SetErrorMessage(RegisterState state,RegisterErrorMessageSetAction action)
         {
             return state with
             {
@@ -122,24 +122,24 @@ namespace ChattingWebApp.Client.Store
         }
 
         [EffectMethod]
-        public async Task ValidateUser(UserValidateAction validateAction, IDispatcher dispatcher)
+        public async Task ValidateUser(RegisterValidateAction validateAction, IDispatcher dispatcher)
         {
-            dispatcher.Dispatch(new UserOnValidatingAction());
+            dispatcher.Dispatch(new RegisterOnValidatingAction());
             var user = await http.GetFromJsonAsync<User>($"user/getuserbynickname/{validateAction.user.Nickname}");
 
             if (!validateAction.user.Nickname.ToLower().Equals(user.Nickname.ToLower()))
             {
-                dispatcher.Dispatch(new UserIsValidSetAction(true));
-                dispatcher.Dispatch(new UserErrorMessageSetAction("Username is Valid"));
+                dispatcher.Dispatch(new RegisterIsValidSetAction(true));
+                dispatcher.Dispatch(new RegisterErrorMessageSetAction("Username is Valid"));
                 return;
             }
-            dispatcher.Dispatch(new UserIsValidSetAction(false));
-            dispatcher.Dispatch(new UserErrorMessageSetAction("Username is currently in use"));
+            dispatcher.Dispatch(new RegisterIsValidSetAction(false));
+            dispatcher.Dispatch(new RegisterErrorMessageSetAction("Username is currently in use"));
         }
         [EffectMethod]
-        public async Task RegisterUser(UserRegisterAction registerAction, IDispatcher dispatcher)
+        public async Task RegisterUser(RegisterRegisterAction registerAction, IDispatcher dispatcher)
         {
-            await http.PostAsJsonAsync<User>("user/registeruser", registerAction.user);
+            await http.PostAsJsonAsync("user/registeruser", registerAction.user);
             _nav.NavigateTo("/");
         }
     }

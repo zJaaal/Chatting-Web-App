@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ChattingWebApp.Client
 {
+    // If you are going to make a release erase the line #24
     public class Program
     {
         public static async Task Main(string[] args)
