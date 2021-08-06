@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChattingWebApp.Server", "ChattingWebApp\Server\ChattingWebApp.Server.csproj", "{2BF6ADE1-1A42-4D9C-B830-17718F4AE14F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChattingWebApp.Server", "ChattingWebApp\Server\ChattingWebApp.Server.csproj", "{2BF6ADE1-1A42-4D9C-B830-17718F4AE14F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChattingWebApp.Client", "ChattingWebApp\Client\ChattingWebApp.Client.csproj", "{1901FBD1-C053-453A-B3FE-D989D475D391}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChattingWebApp.Client", "ChattingWebApp\Client\ChattingWebApp.Client.csproj", "{1901FBD1-C053-453A-B3FE-D989D475D391}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChattingWebApp.Shared", "ChattingWebApp\Shared\ChattingWebApp.Shared.csproj", "{5D1A7F0A-C81C-4DF8-85C8-9EC3056E28D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChattingWebApp.Shared", "ChattingWebApp\Shared\ChattingWebApp.Shared.csproj", "{5D1A7F0A-C81C-4DF8-85C8-9EC3056E28D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
