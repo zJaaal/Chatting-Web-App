@@ -334,3 +334,4 @@ ASALocalRun/
 .localhistory/
 ChattingWebApp/ChattingWebApp/Shared/Utility.cs
 ChattingWebApp/.editorconfig
+ChattingWebApp/ChattingWebApp/Server/appsettings.json
