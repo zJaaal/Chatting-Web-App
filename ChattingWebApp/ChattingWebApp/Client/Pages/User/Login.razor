@@ -1,0 +1,37 @@
+﻿@inherits FluxorComponent
+@inject IDispatcher dispatcher
+@inject IState<LoginState> state
+@page "/"
+<h3>Login</h3>
+<div class="container">
+    <div class="row">
+        <input Type="text" @bind-value="authRequest.Nickname" Placeholder="Nickname" />
+    </div>
+    <div class="row mt-3">
+        <input Type="password" @bind-value="authRequest.Password" Placeholder="Password">
+    </div>
+    @if (!isAuthenticate)
+    {
+        <div class="row">
+            <p style="color: red;">@message</p>
+        </div>
+    }
+    @if (authenticating)
+    {
+        <div class="row">
+            <p style="color: blue;">Authenticating Nickname and Password...</p>
+        </div>
+    }
+    <button type="submit" class="btn btn-danger mt-2" @onclick="@LoginUser">Login</button>
+</div>
+    @code {
+        private AuthenticationRequest authRequest => state.Value.AuthRequest;
+        private string message => state.Value.Message;
+        private bool authenticating => state.Value.Authenticating;
+        private bool isAuthenticate => state.Value.IsAuthenticate;
+
+        private void LoginUser()
+        {
+            dispatcher.Dispatch(new LoginValidateJwt(authRequest));
+        }
+    }

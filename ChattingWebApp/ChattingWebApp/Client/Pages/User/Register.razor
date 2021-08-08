@@ -51,7 +51,7 @@
     public void Regist()
     {
         //Add a BlazoredToast (maybe) to let the user know that they registered on the system.
-        dispatcher.Dispatch(new RegisterRegisterAction(_user));
+        dispatcher.Dispatch(new RegisterRegisteringAction(_user));
         dispatcher.Dispatch(new RegisterOnResetAction());
     }
 }

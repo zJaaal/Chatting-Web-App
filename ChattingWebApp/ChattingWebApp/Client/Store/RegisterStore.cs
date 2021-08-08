@@ -60,11 +60,11 @@ namespace ChattingWebApp.Client.Store
             this.message = message;
         }
     }
-    public class RegisterRegisterAction
+    public class RegisterRegisteringAction
     {
         public User user { get; }
 
-        public RegisterRegisterAction(User user)
+        public RegisterRegisteringAction(User user)
         {
             this.user = user;
         }
@@ -137,7 +137,7 @@ namespace ChattingWebApp.Client.Store
             dispatcher.Dispatch(new RegisterErrorMessageSetAction("Username is currently in use"));
         }
         [EffectMethod]
-        public async Task RegisterUser(RegisterRegisterAction registerAction, IDispatcher dispatcher)
+        public async Task RegisterUser(RegisterRegisteringAction registerAction, IDispatcher dispatcher)
         {
             await http.PostAsJsonAsync("user/registeruser", registerAction.user);
             _nav.NavigateTo("/");
