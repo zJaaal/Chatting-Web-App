@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -25,9 +26,9 @@ namespace ChattingWebApp.Client
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             User currentUser = await GetUserByJWTAsync(); 
-
             if (currentUser != null && currentUser.Nickname != null)
             {
+                await CreateHeader(currentUser);
                 //create a claims
                 var claimEmailAddress = new Claim(ClaimTypes.Name, currentUser.Nickname);
                 var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(currentUser.UserID));
@@ -40,6 +41,12 @@ namespace ChattingWebApp.Client
             else
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
+        private async Task CreateHeader(User user)
+        {
+                var jwtToken = await _localStorageService.GetItemAsStringAsync("jwt_token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", jwtToken);
+                return;
+        }
         public async Task<User> GetUserByJWTAsync()
         {
             //pulling the token from localStorage
@@ -51,7 +58,7 @@ namespace ChattingWebApp.Client
             requestMessage.Content = new StringContent(jwtToken);
 
             requestMessage.Content.Headers.ContentType
-                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                = new MediaTypeHeaderValue("application/json");
 
             //making the http request
             var response = await _httpClient.SendAsync(requestMessage);

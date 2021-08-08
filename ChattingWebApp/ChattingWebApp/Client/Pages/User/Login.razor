@@ -1,6 +1,7 @@
 ﻿@inherits FluxorComponent
 @inject IDispatcher dispatcher
 @inject IState<LoginState> state
+@inject NavigationManager nav 
 @page "/"
 <h3>Login</h3>
 <div class="container">
@@ -35,6 +36,18 @@
     private bool authenticating => state.Value.Authenticating;
     private bool isAuthenticate => state.Value.IsAuthenticate;
 
+    [CascadingParameter]
+    public Task<AuthenticationState> authenticationState { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await authenticationState;
+
+        if (user.User.Identity.IsAuthenticated)
+            nav.NavigateTo("/profile");
+
+    }
     private void LoginUser()
     {
         dispatcher.Dispatch(new LoginValidateJwt(authRequest));

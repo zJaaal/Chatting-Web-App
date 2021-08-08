@@ -1,5 +1,7 @@
 ﻿using ChattingWebApp.Shared;
 using ChattingWebApp.Shared.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -57,7 +59,6 @@ namespace ChattingWebApp.Server.Controllers
         {
             return await context.Users.FirstOrDefaultAsync(x => x.UserID == id);
         }
-
         [HttpGet("getuserbynickname/{nickname}")]
         public async Task<User> GetUserByNickname(string nickname)
         {

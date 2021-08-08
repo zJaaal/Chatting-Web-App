@@ -70,7 +70,7 @@ namespace ChattingWebApp.Client.Store
         }
     }
 
-    public static class UserReducers
+    public static class RegisterReducers
     {
         [ReducerMethod(typeof(RegisterOnValidatingAction))]
         public static RegisterState OnValidating(RegisterState state)
@@ -110,12 +110,12 @@ namespace ChattingWebApp.Client.Store
             };
         }
     }
-    public class UserEffects
+    public class RegisterEffects
     {
         private readonly HttpClient http;
         private readonly NavigationManager _nav;
 
-        public UserEffects(HttpClient http, NavigationManager nav)
+        public RegisterEffects(HttpClient http, NavigationManager nav)
         {
             this.http = http;
             _nav = nav;
