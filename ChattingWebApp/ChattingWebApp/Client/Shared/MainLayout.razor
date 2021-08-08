@@ -1,17 +1,34 @@
 ﻿@inherits LayoutComponentBase
+@inject ILocalStorageService _localStorageService
+@inject NavigationManager _navigationManager
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+    </Authorized>
+    </AuthorizeView>
 
     <div class="main">
-        <div class="top-row px-4">
-            <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="top-row px-4">
+                    <button class="btn btn-danger ml-md-auto" @onclick="Logout">Log out</button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
         <div class="content px-4">
             @Body
         </div>
     </div>
 </div>
+@code{
+    private async Task Logout()
+    {
+        await _localStorageService.RemoveItemAsync("jwt_token");
+        _navigationManager.NavigateTo("/", true);
+    }
+}
