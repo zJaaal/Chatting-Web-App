@@ -50,6 +50,7 @@
     }
     private void LoginUser()
     {
+        authRequest.Nickname = authRequest.Nickname.Replace(" ", "_").Trim();
         dispatcher.Dispatch(new LoginValidateJwt(authRequest));
     }
 }

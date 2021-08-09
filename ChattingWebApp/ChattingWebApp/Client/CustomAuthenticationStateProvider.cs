@@ -28,7 +28,6 @@ namespace ChattingWebApp.Client
             User currentUser = await GetUserByJWTAsync(); 
             if (currentUser != null && currentUser.Nickname != null)
             {
-                await CreateHeader(currentUser);
                 //create a claims
                 var claimEmailAddress = new Claim(ClaimTypes.Name, currentUser.Nickname);
                 var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(currentUser.UserID));
@@ -40,12 +39,6 @@ namespace ChattingWebApp.Client
             }
             else
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-        }
-        private async Task CreateHeader(User user)
-        {
-                var jwtToken = await _localStorageService.GetItemAsStringAsync("jwt_token");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", jwtToken);
-                return;
         }
         public async Task<User> GetUserByJWTAsync()
         {
@@ -64,6 +57,12 @@ namespace ChattingWebApp.Client
             var response = await _httpClient.SendAsync(requestMessage);
 
             var responseStatusCode = response.StatusCode;
+            if (responseStatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                await _localStorageService.RemoveItemAsync("jwt_token");
+                return null;
+            }
+
             var returnedUser = await response.Content.ReadFromJsonAsync<User>();
 
             //returning the user if found

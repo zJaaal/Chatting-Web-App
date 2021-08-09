@@ -1,5 +1,6 @@
 ﻿@page "/profile"
 @inject NavigationManager nav
+@attribute [Authorize]
 <AuthorizeView>
     <Authorized>
         <h1>Hello, world!</h1>

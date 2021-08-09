@@ -30,7 +30,7 @@ namespace ChattingWebApp.Client
             //Inject IHttpClientFactory and then do something like this
             //var client = http.CreateClient("AuthorizationClient");
 
-            builder.Services.AddHttpClient("AuthorizationClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+            builder.Services.AddHttpClient("ContactsClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
                             .AddHttpMessageHandler<CustomAuthorizationHandler>();
 
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();

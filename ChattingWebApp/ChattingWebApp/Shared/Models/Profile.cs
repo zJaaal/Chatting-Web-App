@@ -6,6 +6,7 @@ namespace ChattingWebApp.Shared.Models
     {
         public int ProfileID { get; set; }
         public int UserID { get; set; }
+        public string Nickname { get; set; }
         public DateTime LastTimeConnected { get; set; }
         public bool Status { get; set; }
         public string ProfilePhoto { get; set; }

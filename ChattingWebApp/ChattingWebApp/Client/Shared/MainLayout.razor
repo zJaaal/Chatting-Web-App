@@ -26,6 +26,8 @@
     </div>
 </div>
 @code{
+    [CascadingParameter]
+    public Task<AuthenticationState> authenticationState { get; set; }
     private async Task Logout()
     {
         await _localStorageService.RemoveItemAsync("jwt_token");

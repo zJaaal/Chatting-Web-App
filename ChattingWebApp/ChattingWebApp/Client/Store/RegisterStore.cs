@@ -140,7 +140,7 @@ namespace ChattingWebApp.Client.Store
         public async Task RegisterUser(RegisterRegisteringAction registerAction, IDispatcher dispatcher)
         {
             await http.PostAsJsonAsync("user/registeruser", registerAction.user);
-            _nav.NavigateTo("/");
+            _nav.NavigateTo("/", true);
         }
     }
 }

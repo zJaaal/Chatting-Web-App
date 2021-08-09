@@ -1,0 +1,88 @@
+﻿@page "/contacts"
+@inherits FluxorComponent
+@inject IDispatcher dispatcher
+@inject IState<ContactsState> state
+@inject NavigationManager nav
+@attribute [Authorize]
+
+<AuthorizeView>
+    <Authorized>
+        <div class="input-group mb-3" style="z-index:0;">
+            <input type="text" class="form-control" placeholder="Search" @bind-value="filter" aria-label="Search" aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" @onclick="Search">Search</button>
+            </div>
+        </div>
+        @if (isLoading)
+        {
+            <div class="alert alert-info" role="alert">
+                Loading contacts...
+            </div>
+        }
+        else if (profiles == null || profiles.Count == 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                Couldnt found contacts.
+            </div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var p in profiles)
+                 {
+                    if (p.Nickname != context.User.Identity.Name)
+                    {
+                        <a href="#" class="list-group-item list-group-item-action d-flex flex-row ">
+                            <img class="m-2" style="width: 100px; height: 100px; border-radius: 50%;" src="@p.ProfilePhoto" />
+                            <div class="w-100 m-2">
+                                <h5>@p.Nickname</h5>
+                                <p>@p.AboutMe</p>
+                                <small>@(SetLastTimeConnected(p))</small>
+                            </div>
+                        </a>
+                    }
+                 }
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+
+@code {
+
+    private List<Profile> profiles => state.Value.Profiles;
+    private bool isLoading => state.Value.IsLoading;
+    private string filter = string.Empty;
+
+    [CascadingParameter]
+    public Task<AuthenticationState> authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await authenticationState;
+
+        if (!user.User.Identity.IsAuthenticated)
+        {
+            nav.NavigateTo("/");
+            return;
+        }
+
+
+        dispatcher.Dispatch(new ContactsLoadProfilesAction());
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrEmpty(filter))
+        {
+            dispatcher.Dispatch(new ContactsLoadProfilesAction());
+            return;
+        }
+
+        dispatcher.Dispatch(new ContactsLoadProfilesByFilterAction(filter));
+    }
+
+    private string SetLastTimeConnected(Profile profile) =>
+     profile.Status ? "Connected" : $"Last time on {profile.LastTimeConnected.ToString("MMM dd")} at {profile.LastTimeConnected.ToString("hh:mm tt")}";
+
+}
