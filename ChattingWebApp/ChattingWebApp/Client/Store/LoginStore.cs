@@ -123,6 +123,7 @@ namespace ChattingWebApp.Client.Store
             }
             dispatcher.Dispatch(new LoginSetIsAuthenticate(true));
             await localStorage.SetItemAsync("jwt_token", authResponse.Token);
+            await httpClient.PutAsJsonAsync($"user/updatestatus", action.AuthenticationRequest.Nickname);
             navigationManager.NavigateTo("/profile", true);
         }
     }

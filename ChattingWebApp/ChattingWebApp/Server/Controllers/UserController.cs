@@ -55,7 +55,27 @@ namespace ChattingWebApp.Server.Controllers
             {
                 return BadRequest();
             }
-         }
+        }
+        [HttpPut("updatestatus")]
+        public async Task<ActionResult> UpdateStatus([FromBody] string nickname)
+        {
+            try
+            {
+                var userToUpdate = await context.Users.FirstOrDefaultAsync(x => x.Nickname == nickname);
+                var profileToUpdate = await context.Profiles.FirstOrDefaultAsync(x => x.UserID == userToUpdate.UserID);
+                profileToUpdate.Status = true;
+                profileToUpdate.LastTimeConnected = DateTime.Now;
+
+                await context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch(Exception)
+            {
+                return BadRequest();
+            }
+        }
+
         [HttpGet("{id}",Name = "getuserbyid")]
         public async Task<ActionResult<User>> GetUser(int id)
         {

@@ -30,7 +30,7 @@
             <div class="list-group">
                 @foreach (var p in profiles)
                  {
-                    if (p.Nickname != context.User.Identity.Name)
+                    if (p.UserID.ToString() != Id)
                     {
                         <a href="#" class="list-group-item list-group-item-action d-flex flex-row ">
                             <img class="m-2" style="width: 100px; height: 100px; border-radius: 50%;" src="@p.ProfilePhoto" />
@@ -53,6 +53,7 @@
     private List<Profile> profiles => state.Value.Profiles;
     private bool isLoading => state.Value.IsLoading;
     private string filter = string.Empty;
+    private string Id = string.Empty;
 
     [CascadingParameter]
     public Task<AuthenticationState> authenticationState { get; set; }
@@ -66,8 +67,7 @@
             nav.NavigateTo("/");
             return;
         }
-
-
+        Id = user.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
         dispatcher.Dispatch(new ContactsLoadProfilesAction());
     }
 
