@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.1.2" />
@@ -18,5 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared\ChattingWebApp.Shared.csproj" />
   </ItemGroup>
+
+
 
 </Project>

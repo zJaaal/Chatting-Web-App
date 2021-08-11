@@ -1,7 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@inject ILocalStorageService _localStorageService
-@inject NavigationManager _navigationManager
-
 <div class="page">
     <AuthorizeView>
         <Authorized>
@@ -15,7 +12,6 @@
         <AuthorizeView>
             <Authorized>
                 <div class="top-row px-4">
-                    <button class="btn btn-danger ml-md-auto" @onclick="Logout">Log out</button>
                 </div>
             </Authorized>
         </AuthorizeView>
@@ -25,12 +21,4 @@
         </div>
     </div>
 </div>
-@code{
-    [CascadingParameter]
-    public Task<AuthenticationState> authenticationState { get; set; }
-    private async Task Logout()
-    {
-        await _localStorageService.RemoveItemAsync("jwt_token");
-        _navigationManager.NavigateTo("/", true);
-    }
-}
+

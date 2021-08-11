@@ -24,17 +24,21 @@ namespace ChattingWebApp.Server.Controllers
         [HttpGet("getcontacts")]
         public async Task<List<Profile>> GetProfilesAsync()
         {
-            return await context.Profiles.ToListAsync();
+            return await context.Profiles.OrderBy(p => p.Nickname).ToListAsync();
         }
         [HttpGet("getcontacts/{filter}")]
         public async Task<List<Profile>> GetProfilesByFilterAsync(string filter)
         {
-            return await context.Profiles.Where( p => p.Nickname.Contains(filter)).ToListAsync();
+            return await context.Profiles.Where( p => p.Nickname.Contains(filter)).OrderBy(p => p.Nickname).ToListAsync();
         }
         [HttpGet("getprofile/{id}")]
-        public async Task<Profile> GetProfile(int id)
+        public async Task<ActionResult<Profile>> GetProfile(int id)
         {
-            return await context.Profiles.FirstOrDefaultAsync(x => x.UserID == id);
+            var profile = await context.Profiles.FirstOrDefaultAsync(x => x.UserID == id);
+            if (profile == null)
+                return await Task.FromResult(new Profile() { Nickname = ""});
+
+            return await Task.FromResult(profile);
         }
         [HttpGet("getcurrentprofile")]
         public async Task<ActionResult<Profile>> GetCurrentProfile()

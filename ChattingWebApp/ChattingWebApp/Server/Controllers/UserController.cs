@@ -56,8 +56,8 @@ namespace ChattingWebApp.Server.Controllers
                 return BadRequest();
             }
         }
-        [HttpPut("updatestatus")]
-        public async Task<ActionResult> UpdateStatus([FromBody] string nickname)
+        [HttpPut("loginstatus")]
+        public async Task<ActionResult> LoginStatus([FromBody] string nickname)
         {
             try
             {
@@ -71,6 +71,26 @@ namespace ChattingWebApp.Server.Controllers
                 return Ok();
             }
             catch(Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPut("logoutstatus")]
+        public async Task<ActionResult> LogoutStatus([FromBody] string nickname)
+        {
+            try
+            {
+                var userToUpdate = await context.Users.FirstOrDefaultAsync(x => x.Nickname == nickname);
+                var profileToUpdate = await context.Profiles.FirstOrDefaultAsync(x => x.UserID == userToUpdate.UserID);
+                profileToUpdate.Status = false;
+                profileToUpdate.LastTimeConnected = DateTime.Now;
+
+                await context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception)
             {
                 return BadRequest();
             }

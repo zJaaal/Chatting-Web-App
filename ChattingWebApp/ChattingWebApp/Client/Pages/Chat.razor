@@ -1,0 +1,115 @@
+﻿@page "/chat/{ToUserId:int}"
+@inherits FluxorComponent
+@inject IDispatcher dispatcher
+@inject IState<ContactProfileState> contactState
+@inject NavigationManager nav
+@attribute [Authorize]
+<AuthorizeView>
+    <Authorized>
+        @if (isLoading)
+        {
+            <div class="alert alert-info" role="alert">
+                Loading Profile...
+            </div>
+        }
+        else if (string.IsNullOrEmpty(FromUserProfile.Nickname))
+        {
+            <div class="alert alert-danger" role="alert">
+                Couldn't find any profile
+            </div>
+        }
+        else
+        {
+    <div style="border:0px;height:90vh;" class="card">
+        <div class="card-header" style="height: 100%;">
+            <div class="card-header-tabs top-bar">
+                <div class="col-md-8 col-xs-8 col-lg-12">
+                    <div class="card-title">
+                        <div class="d-flex">   
+                            <div class="d-flex flex-row">
+                                <img class="m-2" style="width: 50px; height: 50px; border-radius: 50%;" src="@FromUserProfile.ProfilePhoto" />
+                                <div class="m-2">
+                                    <h5>@FromUserProfile.Nickname</h5>
+                                    <small>@(SetLastTimeConnected(FromUserProfile))</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div id="divMessageContainerBase" class="card-body msg_container_base">
+                @if (Messages != null && Messages.Count() > 0)
+                {
+                    @foreach (var message in Messages)
+                    {
+                        @if (message.FromUserID == ToUserID)
+                        {
+                            <div class="row msg_container base_sent">
+                                <div class="col-md-10 col-xs-10">
+                                    <div class="messages msg_sent">
+                                        <p>@message.MessageText</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row msg_container base_receive">
+                                <div class="col-md-10 col-xs-10">
+                                    <div class="messages msg_receive">
+                                        <p>@message.MessageText</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+            <!--CHAT USER BOX-->
+            <div class="card-footer">
+                <div class="input-group" id="myForm">
+                    <input id="txtMessageInput" @bind="currentMessage.MessageText" type="text" class="form-control input-sm chat_input"
+                           placeholder="Write your message here...">
+                    <button class="btn btn-primary" @onclick="Send">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+
+    [Parameter]
+    public int ToUserID { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; }
+    private List<Message> Messages = new();
+    private Message currentMessage = new();
+    private Profile FromUserProfile => contactState.Value.ContactProfile;
+    private bool isLoading => contactState.Value.IsLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await authState;
+        if (!user.User.Identity.IsAuthenticated)
+        {
+            nav.NavigateTo("/", true);
+            return;
+        }
+
+        dispatcher.Dispatch(new ContactProfileGetProfileAction(ToUserID));
+        await base.OnInitializedAsync();
+    }
+
+    private void Send()
+        {
+
+        }
+
+    private string SetLastTimeConnected(Profile profile) =>
+     profile.Status ? "Connected" : $"Last time on {profile.LastTimeConnected.ToString("MMM dd")} at {profile.LastTimeConnected.ToString("hh:mm tt")}";
+}

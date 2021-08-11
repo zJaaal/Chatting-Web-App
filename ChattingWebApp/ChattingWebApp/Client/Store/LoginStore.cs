@@ -36,37 +36,37 @@ namespace ChattingWebApp.Client.Store
         }
     }
 
-    public class LoginValidateJwt
+    public class LoginValidateJwtAction
     {
         public AuthenticationRequest AuthenticationRequest { get; }
-        public LoginValidateJwt(AuthenticationRequest authenticationRequest)
+        public LoginValidateJwtAction(AuthenticationRequest authenticationRequest)
         {
             AuthenticationRequest = authenticationRequest;
         }
     }
 
-    public class LoginSetErrorMessage
+    public class LoginSetErrorMessageAction
     {
         public string message { get; }
-        public LoginSetErrorMessage(string message)
+        public LoginSetErrorMessageAction(string message)
         {
             this.message = message;
         }
     }
-    public class LoginSetIsAuthenticate
+    public class LoginSetIsAuthenticateAction
     {
         public bool isAuthenticated { get; }
 
-        public LoginSetIsAuthenticate(bool isAuthenticated)
+        public LoginSetIsAuthenticateAction(bool isAuthenticated)
         {
             this.isAuthenticated = isAuthenticated;
         }
     }
-    public class LoginSetAuthenticating{}
+    public class LoginSetAuthenticatingAction{}
 
     public class LoginReducers
     {
-        [ReducerMethod(typeof(LoginSetAuthenticating))]
+        [ReducerMethod(typeof(LoginSetAuthenticatingAction))]
         public static LoginState OnAuthenticating(LoginState state)
         {
             return state with
@@ -76,7 +76,7 @@ namespace ChattingWebApp.Client.Store
             };
         }
         [ReducerMethod]
-        public static LoginState OnSetIsAuthenticate(LoginState state, LoginSetIsAuthenticate action)
+        public static LoginState OnSetIsAuthenticate(LoginState state, LoginSetIsAuthenticateAction action)
         {
             return state with
             {
@@ -84,7 +84,7 @@ namespace ChattingWebApp.Client.Store
             };
         }
         [ReducerMethod]
-        public static LoginState OnSetIsAuthenticate(LoginState state, LoginSetErrorMessage action)
+        public static LoginState OnSetIsAuthenticate(LoginState state, LoginSetErrorMessageAction action)
         {
             return state with
             {
@@ -108,22 +108,22 @@ namespace ChattingWebApp.Client.Store
         }
 
         [EffectMethod]
-        public async Task OnValidatingJwtToken(LoginValidateJwt action, IDispatcher dispatcher)
+        public async Task OnValidatingJwtToken(LoginValidateJwtAction action, IDispatcher dispatcher)
         {
-            dispatcher.Dispatch(new LoginSetAuthenticating());
+            dispatcher.Dispatch(new LoginSetAuthenticatingAction());
 
             var httpResponse = await httpClient.PostAsJsonAsync<AuthenticationRequest>("user/authenticatejwt", action.AuthenticationRequest);
             var authResponse = await httpResponse.Content.ReadFromJsonAsync<AuthenticationResponse>();
 
             if (string.IsNullOrEmpty(authResponse.Token))
             {
-                dispatcher.Dispatch(new LoginSetIsAuthenticate(false));
-                dispatcher.Dispatch(new LoginSetErrorMessage("Username or Password is invalid"));
+                dispatcher.Dispatch(new LoginSetIsAuthenticateAction(false));
+                dispatcher.Dispatch(new LoginSetErrorMessageAction("Username or Password is invalid"));
                 return;
             }
-            dispatcher.Dispatch(new LoginSetIsAuthenticate(true));
+            dispatcher.Dispatch(new LoginSetIsAuthenticateAction(true));
             await localStorage.SetItemAsync("jwt_token", authResponse.Token);
-            await httpClient.PutAsJsonAsync($"user/updatestatus", action.AuthenticationRequest.Nickname);
+            await httpClient.PutAsJsonAsync($"user/loginstatus", action.AuthenticationRequest.Nickname);
             navigationManager.NavigateTo("/profile", true);
         }
     }
