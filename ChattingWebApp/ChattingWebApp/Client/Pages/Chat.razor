@@ -2,7 +2,10 @@
 @inherits FluxorComponent
 @inject IDispatcher dispatcher
 @inject IState<ContactProfileState> contactState
+@inject IState<MessageState> messageState
+@inject IState<ChatHubState> chatHubState
 @inject NavigationManager nav
+@using System.Timers 
 @attribute [Authorize]
 <AuthorizeView>
     <Authorized>
@@ -12,7 +15,7 @@
                 Loading Profile...
             </div>
         }
-        else if (string.IsNullOrEmpty(FromUserProfile.Nickname))
+        else if (string.IsNullOrEmpty(ToUserProfile.Nickname))
         {
             <div class="alert alert-danger" role="alert">
                 Couldn't find any profile
@@ -20,62 +23,62 @@
         }
         else
         {
-    <div style="border:0px;height:90vh;" class="card">
-        <div class="card-header" style="height: 100%;">
-            <div class="card-header-tabs top-bar">
-                <div class="col-md-8 col-xs-8 col-lg-12">
-                    <div class="card-title">
-                        <div class="d-flex">   
-                            <div class="d-flex flex-row">
-                                <img class="m-2" style="width: 50px; height: 50px; border-radius: 50%;" src="@FromUserProfile.ProfilePhoto" />
-                                <div class="m-2">
-                                    <h5>@FromUserProfile.Nickname</h5>
-                                    <small>@(SetLastTimeConnected(FromUserProfile))</small>
+            <div style="border:0px;height:90vh;" class="card">
+                <div class="card-header" style="height: 100%;">
+                    <div class="card-header-tabs top-bar">
+                        <div class="col-md-8 col-xs-8 col-lg-12">
+                            <div class="card-title">
+                                <div class="d-flex">
+                                    <div class="d-flex flex-row">
+                                        <img class="m-2" style="width: 50px; height: 50px; border-radius: 50%;" src="@ToUserProfile.ProfilePhoto" />
+                                        <div class="m-2">
+                                            <h5>@ToUserProfile.Nickname</h5>
+                                            <small>@(SetLastTimeConnected(ToUserProfile))</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <br />
+                    <div id="divMessageContainerBase" class="card-body msg_container_base">
+                        @if (Messages != null && Messages.Count() > 0)
+                        {
+                            @foreach (var message in Messages)
+                            {
+                                @if (message.FromUserID == ToUserID && !string.IsNullOrWhiteSpace(message.MessageText))
+                                {
+                                    <div class="row msg_container base_sent">
+                                        <div class="col-md-10 col-xs-10">
+                                            <div class="messages msg_sent">
+                                                <p>@message.MessageText</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else if(message.FromUserID == FromUserID && !string.IsNullOrWhiteSpace(message.MessageText))
+                                {
+                                    <div class="row msg_container base_receive">
+                                        <div class="col-md-10 col-xs-10">
+                                            <div class="messages msg_receive">
+                                                <p>@message.MessageText</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                    </div>
+                    <!--CHAT USER BOX-->
+                    <div class="card-footer">
+                        <div class="input-group" id="myForm">
+                            <input id="txtMessageInput" @bind="currentMessage.MessageText" type="text" class="form-control input-sm chat_input"
+                                   placeholder="Write your message here...">
+                            <button class="btn btn-primary" @onclick="Send" disabled ="@DisableButton">Send</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <br />
-            <div id="divMessageContainerBase" class="card-body msg_container_base">
-                @if (Messages != null && Messages.Count() > 0)
-                {
-                    @foreach (var message in Messages)
-                    {
-                        @if (message.FromUserID == ToUserID)
-                        {
-                            <div class="row msg_container base_sent">
-                                <div class="col-md-10 col-xs-10">
-                                    <div class="messages msg_sent">
-                                        <p>@message.MessageText</p>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="row msg_container base_receive">
-                                <div class="col-md-10 col-xs-10">
-                                    <div class="messages msg_receive">
-                                        <p>@message.MessageText</p>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    }
-                }
-            </div>
-            <!--CHAT USER BOX-->
-            <div class="card-footer">
-                <div class="input-group" id="myForm">
-                    <input id="txtMessageInput" @bind="currentMessage.MessageText" type="text" class="form-control input-sm chat_input"
-                           placeholder="Write your message here...">
-                    <button class="btn btn-primary" @onclick="Send">Send</button>
-                </div>
-            </div>
-        </div>
-    </div>
         }
     </Authorized>
 </AuthorizeView>
@@ -87,10 +90,13 @@
 
     [CascadingParameter]
     private Task<AuthenticationState> authState { get; set; }
-    private List<Message> Messages = new();
-    private Message currentMessage = new();
-    private Profile FromUserProfile => contactState.Value.ContactProfile;
+    private List<Message> Messages => chatHubState.Value.Messages;
+    private bool DisableButton => !chatHubState.Value.IsConnected;
+    private Message currentMessage => messageState.Value.CurrentMessage;
+    private Profile ToUserProfile => contactState.Value.ContactProfile;
     private bool isLoading => contactState.Value.IsLoading;
+    private int FromUserID;
+    private Timer timer = new(100);
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,16 +106,47 @@
             nav.NavigateTo("/", true);
             return;
         }
+        FromUserID = Int32.Parse(user.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
+        dispatcher.Dispatch(new OnResetListAction());
         dispatcher.Dispatch(new ContactProfileGetProfileAction(ToUserID));
+
+        timer.Elapsed += (sender, eventArgs) => OnTimerCallback();
+        timer.Start();
+
         await base.OnInitializedAsync();
     }
 
-    private void Send()
+    private void OnTimerCallback()
+    {
+        _ = InvokeAsync(() =>
         {
+            StateHasChanged();
+        });
+    }
 
+    private void Send()
+    {
+        if (string.IsNullOrWhiteSpace(currentMessage.MessageText))
+        {
+            dispatcher.Dispatch(new OnResetMessageAction());
+            return;
         }
+        SetMessage();
+
+        dispatcher.Dispatch(new OnSendMessageChatHubAction());
+        dispatcher.Dispatch(new OnResetMessageAction());
+    }
+
+    private void SetMessage()
+    {
+
+        currentMessage.FromUserID = FromUserID;
+        currentMessage.ToUserID = ToUserProfile.ProfileID;
+
+        dispatcher.Dispatch(new OnSetMessageAction(currentMessage));
+    }
 
     private string SetLastTimeConnected(Profile profile) =>
-     profile.Status ? "Connected" : $"Last time on {profile.LastTimeConnected.ToString("MMM dd")} at {profile.LastTimeConnected.ToString("hh:mm tt")}";
+ profile.Status ? "Connected" : $"Last time on {profile.LastTimeConnected.ToString("MMM dd")} at {profile.LastTimeConnected.ToString("hh:mm tt")}";
 }

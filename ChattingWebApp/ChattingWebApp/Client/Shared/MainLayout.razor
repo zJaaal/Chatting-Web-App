@@ -1,11 +1,12 @@
 ﻿@inherits LayoutComponentBase
+@inject IDispatcher dispatcher
 <div class="page">
     <AuthorizeView>
         <Authorized>
             <div class="sidebar">
                 <NavMenu />
             </div>
-    </Authorized>
+        </Authorized>
     </AuthorizeView>
 
     <div class="main">
@@ -21,4 +22,12 @@
         </div>
     </div>
 </div>
+@code{ 
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        dispatcher.Dispatch(new OnStartChatHubAction());
+    }
+}
 

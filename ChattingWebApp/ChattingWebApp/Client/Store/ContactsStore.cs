@@ -40,10 +40,10 @@ namespace ChattingWebApp.Client.Store
 
         public string Filter { get; }
     }
-    public class ContacsSetProfilesAction
+    public class ContactsSetProfilesAction
     {
         public List<Profile> Profiles { get; }
-        public ContacsSetProfilesAction(List<Profile> profiles)
+        public ContactsSetProfilesAction(List<Profile> profiles)
         {
             Profiles = profiles;
         }
@@ -60,7 +60,7 @@ namespace ChattingWebApp.Client.Store
             };
         }
         [ReducerMethod]
-        public static ContactsState OnLoaded(ContactsState state, ContacsSetProfilesAction action)
+        public static ContactsState OnLoaded(ContactsState state, ContactsSetProfilesAction action)
         {
             return state with
             {
@@ -85,7 +85,7 @@ namespace ChattingWebApp.Client.Store
             dispatcher.Dispatch(new ContactsLoadingAction());
             var http = httpClientFactory.CreateClient("ContactsClient");
             var profiles = await http.GetFromJsonAsync<List<Profile>>("contacts/getcontacts");
-            dispatcher.Dispatch(new ContacsSetProfilesAction(profiles));
+            dispatcher.Dispatch(new ContactsSetProfilesAction(profiles));
         }
 
         [EffectMethod]
@@ -94,7 +94,7 @@ namespace ChattingWebApp.Client.Store
             dispatcher.Dispatch(new ContactsLoadingAction());
             var http = httpClientFactory.CreateClient("ContactsClient");
             var profiles = await http.GetFromJsonAsync<List<Profile>>($"contacts/getcontacts/{action.Filter}");
-            dispatcher.Dispatch(new ContacsSetProfilesAction(profiles));
+            dispatcher.Dispatch(new ContactsSetProfilesAction(profiles));
         }
     }
 }

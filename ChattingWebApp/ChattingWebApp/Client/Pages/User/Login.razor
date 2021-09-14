@@ -50,6 +50,9 @@
     }
     private void LoginUser()
     {
+        if (string.IsNullOrWhiteSpace(authRequest.Nickname) || string.IsNullOrWhiteSpace(authRequest.Password))
+            return;
+
         authRequest.Nickname = authRequest.Nickname.Replace(" ", "_").Trim();
         dispatcher.Dispatch(new LoginValidateJwtAction(authRequest));
     }
